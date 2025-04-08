@@ -1,4 +1,4 @@
-name: CI/CD Pipeline (Fedora)
+name: CI/CD Pipeline
 
 on:
   push:
@@ -11,14 +11,9 @@ env:
 
 jobs:
   build-and-push:
-    runs-on: ubuntu-latest  # Still using Ubuntu host
-    container:
-      image: fedora:latest  # Use Fedora as container environment
-    steps:
-      - name: 📥 Install Required Tools (Node, Git, Docker CLI)
-        run: |
-          dnf install -y git docker nodejs npm
+    runs-on: ubuntu-latest
 
+    steps:
       - name: 📥 Checkout Code
         uses: actions/checkout@v3
 
@@ -36,4 +31,3 @@ jobs:
 
       - name: 🚀 Push Frontend Image
         run: docker push $REGISTRY/$IMAGE_NAME_FRONTEND:latest
-
