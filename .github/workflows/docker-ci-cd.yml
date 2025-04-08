@@ -1,4 +1,4 @@
-name: CI/CD Pipeline
+name: CI/CD Pipeline (Fedora)
 
 on:
   push:
@@ -11,14 +11,27 @@ env:
 
 jobs:
   build-and-push:
-    runs-on: ubuntu-latest
-
+    runs-on: ubuntu-latest  # Still using Ubuntu host
+    container:
+      image: fedora:latest  # Use Fedora as container environment
     steps:
+      - name: 📥 Install Required Tools (Node, Git, Docker CLI)
+        run: |
+          dnf install -y git docker nodejs npm
+
       - name: 📥 Checkout Code
         uses: actions/checkout@v3
 
-      - name: 🔐 Log in to Docker Hub
-        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+      - name: 🔍 Debug Secrets
+        run: |
+          echo "DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}"
+          echo "DOCKER_PASSWORD length: ${#{{ secrets.DOCKER_PASSWORD }}}"
+          
+      - name: 🔐 Docker Login (secure)
+        env:
+          USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: echo "$PASSWORD" | docker login -u "$USERNAME" --password-stdin
 
       - name: 🐳 Build Backend Docker Image
         run: docker build -t $REGISTRY/$IMAGE_NAME_BACKEND:latest ./backend
